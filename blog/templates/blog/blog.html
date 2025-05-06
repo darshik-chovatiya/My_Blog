@@ -1,0 +1,63 @@
+{% extends 'blog/base.html' %}
+
+{% block content %}
+    <button type="button" class="btn btn-primary float-end" data-bs-toggle="modal" data-bs-target="#myModal"
+        style="margin-top: 20px; margin-right: 20px;">
+        ADD BLOG
+    </button>
+    <div class="container mt-5">
+        <div class="row" id="card">
+            {% for blog in blogs %}
+            <div class="col-md-4 mb-3">
+                <a href="/blog/{{ blog.id }}/" style="text-decoration: none; color: inherit;">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">Blog Title : {{ blog.title }}</h5>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    <!-- Modal for Blog Creation -->
+    <div class="modal fade" id="myModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <form method="POST" id="blogForm">
+                    {% csrf_token %}
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Add Blog</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="b-title" class="form-label">Blog Title</label>
+                            <input id="b-title" class="form-control" type="text" name="title" placeholder="Enter the Blog title">
+                            <div id="titleError" class="text-danger small d-none">Title is required</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="b-date" class="form-label">Publish Date</label>
+                            <input id="b-date" class="form-control" type="date" name="date">
+                            <div id="dateError" class="text-danger small d-none">Date is required</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="b-content" class="form-label">Blog Content</label>
+                            <textarea id="b-content" class="form-control" rows="5" name="content" placeholder="Enter the Blog content"></textarea>
+                            <div id="contentError" class="text-danger small d-none">Content is required</div>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary" id="saveblog">Save Blog</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

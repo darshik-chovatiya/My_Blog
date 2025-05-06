@@ -1,0 +1,47 @@
+{% extends 'blog/base.html' %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Blog Card -->
+            <div class="card shadow-lg border-0 rounded-4">
+                <div class="card-body p-5">
+                    <h1 class="mb-3 text-primary fw-bold">{{ blog.title }}</h1>
+                    <p class="text-muted mb-4">
+                        <i class="bi bi-calendar-event"></i> Published on: {{ blog.date }}
+                    </p>
+                    <hr>
+                    <div class="fs-5" style="line-height: 1.8;">
+                        {{ blog.content }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Comments Section -->
+            <div class="card shadow-sm border-0 rounded-4 mt-5">
+                <div class="card-body p-4">
+                    <h4 class="mb-3 text-secondary">Comments</h4>
+                    <div class="mb-4">
+
+                        <div class="border rounded p-3 mb-2 bg-light">
+                            <strong>Darshik</strong>
+                            <p class="mb-1">Nice Blog!</p>
+                            <!-- <small class="text-muted">1 hours ago</small> -->
+                        </div>
+                    </div>
+
+                    <!-- Add Comment -->
+                    <form>
+                        <div class="mb-3">
+                            <label for="comment" class="form-label">Add a comment</label>
+                            <textarea class="form-control" id="comment" rows="4" placeholder="Write your thoughts..."></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary px-4">Post Comment</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
