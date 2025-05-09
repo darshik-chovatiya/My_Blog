@@ -1,47 +1,80 @@
 {% extends 'blog/base.html' %}
-
+{% load static %}
+    
 {% block content %}
 <div class="container py-5">
     <div class="row justify-content-center">
-        <div class="col-lg-8">
+        <div class="col-lg-9">
+
             <!-- Blog Card -->
-            <div class="card shadow-lg border-0 rounded-4">
+            <div class="card shadow border-0 rounded-4 mb-5">
                 <div class="card-body p-5">
-                    <h1 class="mb-3 text-primary fw-bold">{{ blog.title }}</h1>
-                    <p class="text-muted mb-4">
-                        <i class="bi bi-calendar-event"></i> Published on: {{ blog.date }}
-                    </p>
+                    <h1 class="fw-bold text-primary mb-3">{{ blog.title }}.</h1>
+                    <div class="text-muted mb-3">
+                        <i class="bi bi-person-circle me-2"></i><strong>{{ blog.author.username }}.</strong> |
+                        <i class="bi bi-calendar3 me-2"></i>{{ blog.date }}
+                    </div>
                     <hr>
-                    <div class="fs-5" style="line-height: 1.8;">
+                    <div class="fs-5 lh-lg">
                         {{ blog.content }}
                     </div>
                 </div>
             </div>
 
             <!-- Comments Section -->
-            <div class="card shadow-sm border-0 rounded-4 mt-5">
+            <div class="card shadow-sm border-0 rounded-4">
                 <div class="card-body p-4">
-                    <h4 class="mb-3 text-secondary">Comments</h4>
-                    <div class="mb-4">
+                    <h4 class="fw-semibold mb-4">Comments</h4>
 
-                        <div class="border rounded p-3 mb-2 bg-light">
-                            <strong>Darshik</strong>
-                            <p class="mb-1">Nice Blog!</p>
-                            <!-- <small class="text-muted">1 hours ago</small> -->
+                    <!-- List Comments -->
+                    <div id="comment-list" class="mb-4">
+                        {% for comment in comments %}
+                        <div class="border rounded-3 p-3 mb-3 bg-light" id="comment-{{ comment.id }}">
+                            <div class="d-flex justify-content-between">
+                                <strong class="text-dark">{{ comment.user.username }}</strong>
+                                {% if comment.user == request.user %}
+                                <div>
+                                    <button class="btn btn-sm btn-outline-primary" onclick="editComment('{{ comment.id }}')">Edit</button>
+                                    <button class="btn btn-sm btn-outline-danger" onclick="deleteComment('{{ comment.id }}')">Delete</button>
+                                </div>
+                                {% endif %}
+                            </div>
+                            <p class="mb-0 mt-2" id="content-{{ comment.id }}">{{ comment.content }}</p>
                         </div>
+                        {% empty %}
+                        <p class="text-muted" id="comments">No comments yet.</p>
+                        {% endfor %}
                     </div>
 
-                    <!-- Add Comment -->
-                    <form>
-                        <div class="mb-3">
-                            <label for="comment" class="form-label">Add a comment</label>
-                            <textarea class="form-control" id="comment" rows="4" placeholder="Write your thoughts..."></textarea>
-                        </div>
-                        <button type="submit" class="btn btn-primary px-4">Post Comment</button>
-                    </form>
+                    <!-- Add Comment Form -->
+                    {% if request.user.is_authenticated %}
+                        {% if not is_owner %}
+                        <form id="comment-form" method="post">
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                <label for="comment" class="form-label">Your Comment</label>
+                                <textarea class="form-control shadow-sm" id="comment" rows="4" placeholder="Write your thoughts..." data-blogid="{{ blog.id }}"></textarea>
+                            </div>
+                            <button id="addComment" type="submit" class="btn btn-primary px-4">Post Comment</button>
+                        </form>
+                        {% else %}
+                        <div class="alert">You are the author of this blog. You can view comments but not post.</div>
+                        {% endif %}
+                    {% endif %}
                 </div>
             </div>
+
         </div>
     </div>
 </div>
+
+<!-- JS Variables -->
+<script>
+    let username = '{{ user.username }}';
+    let csrfToken = '{{ csrf_token }}'; 
+</script>
+{% endblock %}
+
+{% block js %}
+<script src="{% static 'js/comment.js' %}"></script>
 {% endblock %}

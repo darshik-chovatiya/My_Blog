@@ -1,32 +1,35 @@
 {% extends 'blog/base.html' %}
 
 {% block content %}
+<div class="d-flex justify-content-center align-items-center" style="min-height: 90vh;">
+    <div class="card shadow-lg border-0 p-4 rounded-4" style="width: 100%; max-width: 400px;">
+        <div class="card-body">
+            <h3 class="text-center text-dark fw-bold mb-4">Login to MyBlog</h3>
 
-<div class="container mt-5" style="max-width: 400px;">
-    <h3 class="text-center mb-4">Login</h3>
-    
-    <form method="POST">
-        {% csrf_token %}
-        {% for message in messages %}
-            <div class="alert alert-danger">{{ message }}</div>
-        {% endfor %}
+            <form method="POST" novalidate>
+                {% csrf_token %}
+                
+                {% for message in messages %}
+                    <div class="alert alert-danger text-center py-2">{{ message }}</div>
+                {% endfor %}
 
-        <div class="mb-3">
-            <label>Username</label>
-            <input type="text" name="username" class="form-control" required />
+                <div class="mb-3">
+                    <label for="username" class="form-label">Username</label>
+                    <input id="username" type="text" name="username" class="form-control rounded-3" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="password" class="form-label">Password</label>
+                    <input id="password" type="password" name="password" class="form-control rounded-3" required>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100 rounded-3">Login</button>
+            </form>
+
+            <div class="text-center mt-4">
+                <small>Don't have an account? <a href="{% url 'register' %}">Register here</a></small>
+            </div>
         </div>
-
-        <div class="mb-3">
-            <label>Password</label>
-            <input type="password" name="password" class="form-control" required />
-        </div>
-
-        <button type="submit" class="btn btn-primary w-100">Login</button>
-    </form>
-    
-    <div class="text-center mt-3">
-        <p>Don't have an account? <a href="{% url 'register' %}">Create one</a></p>
     </div>
 </div>
-
 {% endblock %}
