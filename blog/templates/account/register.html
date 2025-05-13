@@ -1,0 +1,62 @@
+{% extends 'blog/base.html' %}
+
+{% block title %}Register Page{% endblock %}
+
+
+{% load static %}
+
+{% block content %}
+
+<div class="d-flex justify-content-center align-items-center" style="min-height: 90vh;">
+    <div class="card shadow-lg border-0 p-4 rounded-4" style="width: 100%; max-width: 400px;">
+        <div class="card-body">
+            <h3 class="text-center text-dark fw-bold mb-4">Create Account</h3>
+
+            <form method="POST">
+                {% csrf_token %}
+
+                {% for message in messages %}
+                <div class="alert alert-danger text-center py-2">{{ message }}</div>
+                {% endfor %}
+
+                <div class="mb-3">
+                    <label for="username" class="form-label">Username</label>
+                    <input id="username" type="text" name="username" class="form-control rounded-3" required>
+                    <div id="usernameError" class="text-danger small d-none">Username is required</div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email</label>
+                    <input id="email" type="email" name="email" class="form-control rounded-3" required>
+                    <div id="emailError" class="text-danger small d-none">Email is required</div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="password" class="form-label">Password</label>
+                    <input id="password" type="password" name="password" class="form-control rounded-3" required>
+                    <div id="passwordError" class="text-danger small d-none">Password is required</div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="confirm_password" class="form-label">Confirm Password</label>
+                    <input id="confirm_password" type="password" name="confirm_password" class="form-control rounded-3"required>
+                    <div id="confirm_passwordError" class="text-danger small d-none">Confirm_password is required</div>
+                </div>
+
+                <button type="submit" id="register" class="btn btn-primary w-100 rounded-3">Register</button>
+            </form>
+
+            <div class="text-center mt-4">
+                <small>Already have an account? <a href="{% url 'login' %}">Login here</a></small>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block js %}
+
+<script src="{% static 'js/register.js' %}"></script>
+
+{% endblock %}

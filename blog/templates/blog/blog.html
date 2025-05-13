@@ -1,5 +1,7 @@
 {% extends 'blog/base.html' %}
 
+{% block title %}Blog Page{% endblock %}
+
 {% block content %}
 <div class="d-flex justify-content-end mt-2 align-items-center mb-4">
     <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#myModal">
@@ -13,8 +15,14 @@
         <div class="card blog-card shadow-sm h-100 border-0">
             <a href="/blog/{{ blog.id }}/" class="text-decoration-none text-dark">
                 <div class="card-body">
-                    <h5 class="card-title">{{ blog.title }}</h5>
-                    <p class="text-muted small mb-0">Posted on: {{ blog.date }}</p>
+                    <h5 class="card-title">
+                        {% if blog.title|length > 10 %}
+                            {{ blog.title|slice:":10" }}...
+                        {% else %}
+                            {{ blog.title }}
+                        {% endif %}
+                    </h5>
+                    <p class="text-muted small mb-0">Posted by : {{blog.author.username}} | Posted on: {{ blog.date }}</p>
                 </div>
             </a>
         </div>

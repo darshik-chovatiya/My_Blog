@@ -56,7 +56,8 @@ class BlogDetailView(View):
             return render(request, 'blog/detail.html', {
                 'error': "Something went wrong!"
             })
-        
+
+@method_decorator(login_required(login_url='/login/'), name='dispatch')      
 class BloggerListView(View):
     def get(self, request):
         bloggers = User.objects.exclude(id=request.user.id)
@@ -75,8 +76,7 @@ class AddCommentView(View):
             return redirect('login')
 
         blog = Blog.objects.get(id=blog_id)
-
-        # Prevent blog owner from commenting
+        
         if blog.author == request.user:
             return HttpResponseForbidden("Authors cannot comment on their own blog.")
 
@@ -114,10 +114,7 @@ class SaveCommentView(View):
                 blog=blog
             )
 
-            return JsonResponse({
-                'status': 'ok',
-                'comment': comment.content,
-                'username': request.user.username
+            return JsonResponse({'status': 'ok', 'comment': comment.content, 'username': request.user.username
             })
 
         except Blog.DoesNotExist:
@@ -162,7 +159,7 @@ class UpdateDeleteCommentView(View):
 
 class LoginView(View):
     def get(self, request):
-        return render(request, 'blog/login.html')
+        return render(request, 'account/login.html')
 
     def post(self, request):
         username = request.POST.get('username')
@@ -175,7 +172,7 @@ class LoginView(View):
             return redirect('home')
         else:
             messages.error(request, 'Invalid username or password.')
-            return render(request, 'blog/login.html')
+            return render(request, 'account/login.html')
 
 class LogoutView(View):
     def get(self, request):
@@ -184,40 +181,36 @@ class LogoutView(View):
 
 class RegisterView(View):
     def get(self, request):
-        return render(request, 'blog/register.html')
+        return render(request, 'account/register.html')
 
     def post(self, request):
-        username = request.POST.get('username')
-        password = request.POST.get('password')
-        confirm_password = request.POST.get('confirm_password')
+        username = request.POST.get('username', '').strip()
+        email = request.POST.get('email', '').strip()
+        password = request.POST.get('password', '').strip()
+        confirm_password = request.POST.get('confirm_password', '').strip()
+
+        if not username or not email or not password or not confirm_password:
+            messages.error(request, 'All fields are required.')
+            return render(request, 'account/register.html')
 
         if password != confirm_password:
             messages.error(request, 'Passwords do not match.')
-            return render(request, 'blog/register.html')
+            return render(request, 'account/register.html')
 
         if User.objects.filter(username=username).exists():
             messages.error(request, 'Username already exists.')
-            return render(request, 'blog/register.html')
+            return render(request, 'account/register.html')
+        
+        if User.objects.filter(email=email).exists():
+            messages.error(request, 'Email already exists.')
+            return render(request, 'account/register.html')
 
-        User.objects.create_user(username=username, password=password)
-        messages.success(request, 'Account created! You can now log in.')
+        User.objects.create_user(username=username, email=email, password=password)
         return redirect('login')
 
 class HomeView(View):
     def get(self, request):
         return render(request, 'blog/home.html')
-    
-class BlogEditView(UpdateView):
-    model = Blog
-    fields = ['title', 'content']  
-    template_name = 'blog/blog_edit.html'
-    success_url = '/'
-
-class BlogDeleteView(DeleteView):
-    model = Blog
-    template_name = 'blog/blog_confirm_delete.html'
-    success_url = reverse_lazy('blog-list')  
-
 
 class UserProfileView(View):
     def get(self, request):

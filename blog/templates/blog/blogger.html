@@ -1,6 +1,10 @@
 {% extends 'blog/base.html' %}
 
+{% block title %}Blogger Page{% endblock %}
+
+
 {% block content %}
+
 <div class="container mt-5">
     <h2 class="text-center mb-4">All Bloggers</h2>
 
@@ -24,4 +28,5 @@
         <div class="alert alert-warning text-center">No bloggers found.</div>
     {% endif %}
 </div>
+
 {% endblock %}
