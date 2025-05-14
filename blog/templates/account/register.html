@@ -15,9 +15,7 @@
             <form method="POST">
                 {% csrf_token %}
 
-                {% for message in messages %}
-                <div class="alert alert-danger text-center py-2">{{ message }}</div>
-                {% endfor %}
+                <div id="message" class="alert alert-danger text-center py-2 d-none" data-message="{{ messages.0|default:'' }}"></div>
 
                 <div class="mb-3">
                     <label for="username" class="form-label">Username</label>
@@ -39,12 +37,14 @@
 
                 <div class="mb-3">
                     <label for="confirm_password" class="form-label">Confirm Password</label>
-                    <input id="confirm_password" type="password" name="confirm_password" class="form-control rounded-3"required>
+                    <input id="confirm_password" type="password" name="confirm_password" class="form-control rounded-3"
+                        required>
                     <div id="confirm_passwordError" class="text-danger small d-none">Confirm_password is required</div>
                 </div>
 
-                <button type="submit" id="register" class="btn btn-primary w-100 rounded-3">Register</button>
+                <button type="button" id="register" class="btn btn-primary w-100 rounded-3">Register</button>
             </form>
+
 
             <div class="text-center mt-4">
                 <small>Already have an account? <a href="{% url 'login' %}">Login here</a></small>

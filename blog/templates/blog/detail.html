@@ -1,90 +1,100 @@
 {% extends 'blog/base.html' %}
 
-{% block title %}Blog detail Page{% endblock %}
+{% block title %}Blog Detail{% endblock %}
 
 {% load static %}
-    
+
 {% block content %}
-
-<div class="container py-5">
+<div class="container py-4">
     <div class="row justify-content-center">
-        <div class="col-lg-9">
+        <div class="col-lg-8">
 
-            <div class="card shadow border-0 rounded-4 mb-5">
-                <div class="card-body p-5">
-                    <h1 class="fw-bold text-primary mb-3">{{ blog.title }}.</h1>
-                    <div class="text-muted mb-3">
-                        <i class="bi bi-person-circle me-2"></i><strong>{{ blog.author.username }}.</strong> |
-                        <i class="bi bi-calendar3 me-2"></i>{{ blog.date }}
-                    </div>
-                    <hr>
-                    <div class="fs-5 lh-lg">
+            <div class="card border-0 shadow-sm mb-4 rounded-3">
+                <div class="card-body p-4">
+                    <h3 class="text-primary mb-2">{{ blog.title }}</h3>
+                    <small class="text-muted">
+                        <i class="bi bi-person-circle me-1"></i>{{ blog.author.username }} |
+                        <i class="bi bi-calendar3 me-1"></i>{{ blog.date }}
+                    </small>
+                    <hr class="my-3">
+                    <div class="fs-6 lh-base text-dark">
                         {{ blog.content }}
                     </div>
                 </div>
             </div>
 
-            <div class="card shadow-sm border-0 rounded-4">
+            <div class="card border-0 shadow-sm rounded-3">
                 <div class="card-body p-4">
-                    <h4 class="fw-semibold mb-4">Comments</h4>
+                    <h5 class="mb-3">Comments</h5>
 
-                    <div id="comment-list" class="mb-4">
+                    <div id="comment-list">
                         {% for comment in comments %}
-                        <div class="card shadow-sm mb-3 border-0 bg-light" id="comment-{{ comment.id }}">
-                            <div class="card-body">
-                                <div class="d-flex justify-content-between align-items-start">
-                                    <h6 class="fw-bold mb-2 text-dark">{{ comment.user.username }}</h6>
+                        <div class="border rounded-2 p-3 mb-2 bg-light" id="comment-{{ comment.id }}">
+                            <div class="d-flex justify-content-between">
+                                <div>
                                     {% if comment.user == request.user %}
-                                    <div class="btn-group">
-                                        <button class="btn btn-sm btn-outline-primary" onclick="editComment('{{ comment.id }}')"><i class="fa-solid fa-pen-to-square"></i></button>
-                                        <button class="btn btn-sm btn-outline-danger" onclick="deleteComment('{{ comment.id }}')"><i class="fa-solid fa-trash"></i></button>
-                                    </div>
+                                    <input type="checkbox" class="delete-checkbox" data-commentid="{{ comment.id }}">
                                     {% endif %}
+                                    <strong>{{ comment.user.username|capfirst }}</strong>
                                 </div>
-                                <p class="text-dark mb-0 mt-2" id="content-{{ comment.id }}">{{ comment.content }}</p>
+                                {% if comment.user == request.user %}
+                                <div>
+                                    <button class="btn btn-sm btn-outline-secondary"
+                                        onclick="editComment('{{ comment.id }}')">
+                                        <i class="fa-solid fa-pen-to-square"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger"
+                                        onclick="deleteComment('{{ comment.id }}')">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
+                                </div>
+                                {% endif %}
                             </div>
+                            <div class="mt-2 small text-dark" id="content-{{ comment.id }}">{{ comment.content }}</div>
                         </div>
                         {% empty %}
-                        <div id="comments" class="alert alert-secondary">No comments yet.</div>
-                        <div id="comment-list"></div>
+                        <div class="alert alert-secondary small">No comments yet.</div>
                         {% endfor %}
-                    </div>                   
-                    
+                        {% if request.user.is_authenticated %}
+                            {% if has_commented %}
+                                <button id="deleteSelected" class="btn btn-sm btn-danger mt-1 float-end">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            {% endif %}
+                        {% endif %}
+                    </div>
 
                     {% if request.user.is_authenticated %}
-                        {% if not is_owner %}
-                        <form id="comment-form" method="post">
-                            {% csrf_token %}
-                            <div class="mb-3">
-                                <label for="comment" class="form-label">Your Comment</label>
-                                <textarea class="form-control shadow-sm" id="comment" rows="4" placeholder="Write your thoughts..." data-blogid="{{ blog.id }}"></textarea>
-                             <div id="commentError" class="text-danger small d-none">Please enter a comment</div>
-
-                            </div>
-                            <button id="addComment" type="submit" class="btn btn-primary px-4">Post Comment</button>
-                        </form>
-                        {% else %}
-                        <div class="alert">You are the author of this blog. You can view comments but not post.</div>
-                        {% endif %}
+                    {% if not is_owner %}
+                    <form id="comment-form" method="post" class="mt-4">
+                        {% csrf_token %}
+                        <div class="mb-2">
+                            <label for="comment" class="form-label small">Add Comment</label>
+                            <textarea class="form-control form-control-sm" id="comment" rows="3"
+                                placeholder="Write something..." data-blogid="{{ blog.id }}"></textarea>
+                            <div id="commentError" class="text-danger small d-none">Please enter a comment</div>
+                        </div>
+                        <button id="addComment" type="submit" class="btn btn-sm btn-primary">Post</button>
+                    </form>
+                    {% else %}
+                    <div class="alert mt-3 small">You are the author. You cannot comment on your own blog.</div>
+                    {% endif %}
                     {% endif %}
                 </div>
             </div>
+
+
 
         </div>
     </div>
 </div>
 
-
 <script>
-    
     let username = '{{ user.username }}';
-    let csrfToken = '{{ csrf_token }}'; 
+    let csrfToken = '{{ csrf_token }}';
 </script>
-
 {% endblock %}
 
 {% block js %}
-
 <script src="{% static 'js/comment.js' %}"></script>
-
 {% endblock %}

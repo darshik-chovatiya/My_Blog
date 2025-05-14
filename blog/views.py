@@ -1,8 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404 
 from django.http import HttpResponseForbidden
 from django.views import View 
-from django.views.generic import UpdateView , DeleteView
-from django.urls import reverse_lazy
 from .models import Blog, Comment
 from django.http import JsonResponse 
 from django.views.decorators.csrf import csrf_exempt 
@@ -40,22 +38,16 @@ class BlogCreateView(View):
     
 class BlogDetailView(View):
     def get(self, request, pk):
-        try:
-            blog = get_object_or_404(Blog, pk=pk)
-            comments = Comment.objects.filter(blog=blog).order_by('-created_at')
-            
-            print(f"Blog: {blog.title}, Comments count: {comments.count()}")
-            
-            return render(request, 'blog/detail.html', {
-                'blog': blog,
-                'comments': comments,
-                'is_owner': blog.author == request.user
-            })
-        except Exception as e:
-            print(f"Error: {str(e)}")
-            return render(request, 'blog/detail.html', {
-                'error': "Something went wrong!"
-            })
+        blog = Blog.objects.get(id=pk)
+        comments = Comment.objects.filter(blog=blog)
+
+        has_commented = comments.filter(user=request.user).exists()
+
+        return render(request, 'blog/detail.html', {
+            'blog': blog,
+            'comments': comments,
+            'has_commented': has_commented,
+        })
 
 @method_decorator(login_required(login_url='/login/'), name='dispatch')      
 class BloggerListView(View):
@@ -156,6 +148,17 @@ class UpdateDeleteCommentView(View):
             return JsonResponse({'status': 'error', 'message': 'Comment not found'}, status=404)
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+        
+class DeleteSelectedCommentsView(View):
+    def delete(self, request):
+        try:
+            data = json.loads(request.body)
+            comment_ids = data.get('comment_ids', [])
+            print('caling.....' , comment_ids)
+            Comment.objects.filter(id__in=comment_ids, user=request.user).delete()
+            return JsonResponse({'success': True})
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)}, status=400)
 
 class LoginView(View):
     def get(self, request):
@@ -184,30 +187,33 @@ class RegisterView(View):
         return render(request, 'account/register.html')
 
     def post(self, request):
-        username = request.POST.get('username', '').strip()
-        email = request.POST.get('email', '').strip()
-        password = request.POST.get('password', '').strip()
-        confirm_password = request.POST.get('confirm_password', '').strip()
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            try:
+                data = json.loads(request.body)
+                username = data.get('username', '').strip()
+                email = data.get('email', '').strip()
+                password = data.get('password', '').strip()
+                confirm_password = data.get('confirm_password', '').strip()
 
-        if not username or not email or not password or not confirm_password:
-            messages.error(request, 'All fields are required.')
-            return render(request, 'account/register.html')
+            except json.JSONDecodeError:
+                return JsonResponse({'success': False, 'message': 'Invalid JSON'}, status=400)
 
-        if password != confirm_password:
-            messages.error(request, 'Passwords do not match.')
-            return render(request, 'account/register.html')
+            if not username or not email or not password or not confirm_password:
+                return JsonResponse({'success': False, 'message': 'All fields are required.'})
 
-        if User.objects.filter(username=username).exists():
-            messages.error(request, 'Username already exists.')
-            return render(request, 'account/register.html')
+            if User.objects.filter(username=username).exists():
+                return JsonResponse({'success': False, 'message': 'Username already exists.'})
+
+            if User.objects.filter(email=email).exists():
+                return JsonResponse({'success': False, 'message': 'Email already exists.'})
+
+            user = User.objects.create_user(username=username, email=email, password=password)
+            login(request, user)
+            return JsonResponse({'success': True, 'redirect_url': '/home/'})
+
+        return JsonResponse({'success': False, 'message': 'Invalid request.'})
         
-        if User.objects.filter(email=email).exists():
-            messages.error(request, 'Email already exists.')
-            return render(request, 'account/register.html')
-
-        User.objects.create_user(username=username, email=email, password=password)
-        return redirect('login')
-
+@method_decorator(login_required(login_url='/login/'), name='dispatch')
 class HomeView(View):
     def get(self, request):
         return render(request, 'blog/home.html')

@@ -2,7 +2,7 @@ from django.urls import path
 from . import views
 from .views import (
     BlogCreateView, BlogDetailView, AddCommentView,
-    LoginView, LogoutView, HomeView, RegisterView , SaveCommentView , UpdateDeleteCommentView , BloggerListView , BloggerBlogListView , UserProfileView
+    LoginView, LogoutView, HomeView, RegisterView , SaveCommentView , UpdateDeleteCommentView , BloggerListView , BloggerBlogListView , UserProfileView , DeleteSelectedCommentsView
     )
 
 urlpatterns = [
@@ -14,6 +14,7 @@ urlpatterns = [
     path('blog/<int:blog_id>/comment/', AddCommentView.as_view(), name='add-comment'),
     path('comment-action/', UpdateDeleteCommentView.as_view(), name='comment-action'),
     path('save-comment/', SaveCommentView.as_view(), name='save-comment'),
+    path('delete-comments/', DeleteSelectedCommentsView.as_view(), name='delete_selected_comments'),
     path('login/', LoginView.as_view(), name='login'),
     path('logout/', LogoutView.as_view(), name='logout'),
     path('register/', RegisterView.as_view(), name='register'),

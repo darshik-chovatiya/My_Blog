@@ -2,31 +2,42 @@
 
 {% block title %}Blogger Page{% endblock %}
 
-
 {% block content %}
-
 <div class="container mt-5">
     <h2 class="text-center mb-4">All Bloggers</h2>
 
     {% if bloggers %}
-        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-            {% for blogger in bloggers %}
-                <div class="col">
-                    <div class="card h-100 shadow-sm border-0 hover-shadow">
-                        <div class="card-body text-center">
-                            <div class="mb-3">
-                                <img src="https://ui-avatars.com/api/?name={{ blogger.username }}&background=random&rounded=true" class="rounded-circle shadow" width="80" height="80" alt="{{ blogger.username }}">
-                            </div>
-                            <h5 class="card-title mb-2">{{ blogger.username }}</h5>
-                            <a href="{% url 'blogger_blogs' blogger.id %}" class="btn btn-outline-primary btn-sm">View Blogs</a>
-                        </div>
-                    </div>
-                </div>
-            {% endfor %}
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover align-middle text-center">
+                <thead class="table-dark">
+                    <tr>
+                        <th>#</th>
+                        <th>Profile</th>
+                        <th>Username</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for blogger in bloggers %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>
+                                <img src="https://ui-avatars.com/api/?name={{ blogger.username }}&rounded=true" 
+                                     class="rounded-circle  shadow-sm" width="30" height="30" alt="{{ blogger.username }}">
+                            </td>
+                            <td>{{ blogger.username|capfirst }}</td>
+                            <td>
+                                <a href="{% url 'blogger_blogs' blogger.id %}" class="btn btn-sm btn-outline-primary">
+                                    View Blogs
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
     {% else %}
         <div class="alert alert-warning text-center">No bloggers found.</div>
     {% endif %}
 </div>
-
 {% endblock %}

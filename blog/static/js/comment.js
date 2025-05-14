@@ -1,18 +1,28 @@
 let addCommentBtn = document.getElementById('addComment');
+let multiDelete = document.getElementById('deleteSelected');
 
 let blogId = document.getElementById('comment').dataset.blogid;
+
+let commentField = document.getElementById('comment');
+let commentError = document.getElementById('commentError');
+let commentList = document.getElementById('comment-list');
+
+commentField.addEventListener('input', function () {
+    validateCommentField('comment', 'commentError');
+});
+
 
 addCommentBtn.addEventListener('click', async function (e) {
     e.preventDefault();
 
-    let commentField = document.getElementById('comment'); 
-    let comment = commentField.value.trim();               
+    let commentField = document.getElementById('comment');
+    let comment = commentField.value.trim();
     let commentList = document.getElementById('comment-list');
     let commentError = document.getElementById('commentError');
 
     if (comment === '') {
         commentError.classList.remove('d-none');
-        return; 
+        return;
     } else {
         commentError.classList.add('d-none');
     }
@@ -42,7 +52,7 @@ addCommentBtn.addEventListener('click', async function (e) {
             div.innerHTML = `<strong>${data.username}</strong><br><p>${data.comment}</p>`;
             commentList.appendChild(div);
 
-            commentField.value = ''; 
+            commentField.value = '';
         } else {
             console.log(blogId);
             console.log(data.message);
@@ -53,6 +63,20 @@ addCommentBtn.addEventListener('click', async function (e) {
     }
     location.reload();
 });
+
+function validateCommentField(fieldId, errorId) {
+    let field = document.getElementById(fieldId);
+    let errorElement = document.getElementById(errorId);
+
+    if (field.value.trim() === '') {
+        errorElement.classList.remove('d-none');
+        return false;
+    } else {
+        errorElement.classList.add('d-none');
+        return true;
+    }
+}
+
 
 
 async function editComment(commentId) {
@@ -94,7 +118,7 @@ async function editComment(commentId) {
             contentElement.innerText = data.content;
         } else {
             alert(data.message || 'Failed to update comment.');
-            contentElement.innerText = oldContent; 
+            contentElement.innerText = oldContent;
         }
     });
 
@@ -139,4 +163,89 @@ async function deleteComment(commentId) {
         }
     });
 
+}
+
+multiDelete.addEventListener('click', () => {
+
+    const checkboxes = document.querySelectorAll('.delete-checkbox:checked');
+    const commentIds = Array.from(checkboxes).map(cb => cb.dataset.commentid);
+
+    if (commentIds.length === 0) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'No comments selected',
+            text: 'Please select at least one comment to delete.',
+        });
+        return;
+    }
+
+    Swal.fire({
+        title: 'Are you sure?',
+        text: 'This will delete the selected comments permanently.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Yes, delete them!',
+        cancelButtonText: 'Cancel'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch("/delete-comments/", {
+                method: "DELETE",
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({ comment_ids: commentIds })
+            }).then(response => {
+                    if (!response.ok) throw new Error("Something went wrong");
+                    return response.json();
+                }).then(data => {
+                    if (data.success) {
+                        commentIds.forEach(id => {
+                            const commentDiv = document.getElementById(`comment-${id}`);
+                            if (commentDiv) commentDiv.remove();
+                        });
+
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Deleted!',
+                            text: 'Selected comments have been deleted.',
+                            timer: 1500,
+                            showConfirmButton: false
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Failed to delete comments. Please try again.'
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'An error occurred while deleting comments.'
+                    });
+                });
+                window.location.reload();
+        }
+    });
+});
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
 }
